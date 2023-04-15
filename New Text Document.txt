@@ -1,0 +1,32 @@
+color ray_color(const ray& r, const hittable& world, int depth) {
+    hit_record rec;
+
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if (depth <= 0)
+        return color(0, 0, 0);
+
+    if (world.hit(r, rec)) {
+        ray scattered;
+        color attenuation;
+        vec3 direction;
+
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered, light))
+            direction = rec.p - light.position;
+            float distance = direction.length();
+
+            attenuationd = light.exponent * distance * distance +
+                light.linear * distance +
+                light.constant;
+
+            float diffuseFactor(max(dot(normalize(rec.normal), normalize(direction)), 1.0));
+
+            diffuseColour = vec3(light.col * diffuseFactor);
+
+            return attenuation * diffuseColour * ray_color(scattered, world, depth - 1);
+        return color(0, 0, 0);
+    }
+
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5 * (unit_direction.y() + 1.0);
+    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+}
